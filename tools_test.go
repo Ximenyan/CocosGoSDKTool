@@ -17,6 +17,13 @@ func TestInitSdk(t *testing.T) {
 	t.Log(rpc.GetDynamicGlobalProperties())
 }
 
+func TestBuildInvokeContract(t *testing.T) {
+	hex_str,acct_info, err := BuildInvokeContract("ggggxxx", "contract.demo2test","xxxx", 1)
+	t.Log(acct_info)
+	t.Log(err)
+	t.Log(hex_str)
+}
+
 func TestCreateAccountByFaucet(t *testing.T) {
 	t.Log(CreateAccountByFaucet("hicocos1234", MAIN_NET_FAUCET, "0x024ae3a12eaf1c1a1f80979fdca3271c6e830df0ea59df2f1956fe7c692703c6ea"))
 	t.Log(CreateAccountByFaucet("hicocos10086", MAIN_NET_FAUCET,

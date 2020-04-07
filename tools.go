@@ -821,3 +821,36 @@ func SignTransaction(tx_raw_hex string, signatures []string) (tx *Tx, e error) {
 		return tx, err
 	}
 }
+
+func BuildInvokeContract(from, contract_name, func_name string, args ...interface{}) (tx_raw_hex string,acct_infos map[string]string, err error){
+	contract_info := rpc.GetContract(contract_name)
+	value_list := CreateValueList(args)
+	from_info := rpc.GetAccountInfoByName(from)
+	acct_infos = make(map[string]string)
+	acct_infos[from_info.ID] = from
+	call_data := &CallData{
+		ValueList:    value_list,
+		Extensions:   []interface{}{},
+		Caller:       ObjectId(from_info.ID),
+		ContractID:   ObjectId(contract_info.ID),
+		FunctionName: String(func_name),
+	}
+	op := Operation{OP_INVOKE_CONTRACT, call_data}
+	dgp := rpc.GetDynamicGlobalProperties()
+	st := &wallet.Signed_Transaction{
+		RefBlockNum:    dgp.Get_ref_block_num(),
+		RefBlockPrefix: dgp.Get_ref_block_prefix(),
+		Expiration:   	ToExpiration(dgp.Time),
+		Operations:     []Operation{op},
+		ExtensionsData: []interface{}{},
+		Signatures:     []string{},
+	}
+	byte_s := st.GetBytes()
+	var cid []byte
+	if cid, err = hex.DecodeString(sdk.Chain.Properties.ChainID); err != nil {
+		return
+	}
+	byte_s = append(cid, byte_s...)
+	tx_raw_hex = hex.EncodeToString(byte_s)
+	return
+}
